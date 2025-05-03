@@ -1,98 +1,107 @@
 import React, { useEffect, useState } from "react";
 
-function LandingPage() {
-    const [tableId, setTableId] = useState("");
-    const [menuItems, setMenuItems] = useState([]);
-    const [order, setOrder] = useState({}); // NEW: To track item quantities
+export default function LandingPage() {
+  const [tableId, setTableId] = useState("");
+  const [menuItems, setMenuItems] = useState([]);
+  const [order, setOrder] = useState({});            // {itemId: qty}
+  const [message, setMessage] = useState("");
 
-    useEffect(() => {
-        const params = new URLSearchParams(window.location.search);
-        const tableIdParam = params.get("tableId");
-        setTableId(tableIdParam);
+  // --- load table id & menu -----------------------------
+  useEffect(() => {
+    const params = new URLSearchParams(window.location.search);
+    setTableId(params.get("tableId") || "");
 
-        fetch("http://localhost:8080/api/menu")
-            .then(response => response.json())
-            .then(data => setMenuItems(data))
-            .catch(error => {
-                console.error("Error fetching menu:", error);
-            });
-    }, []);
+    fetch("http://localhost:8080/api/menu")
+      .then((res) => res.json())
+      .then(setMenuItems)
+      .catch((err) => console.error(err));
+  }, []);
 
-    // Group menu items by category
-    const groupedMenu = menuItems.reduce((groups, item) => {
-        const category = item.category || "Others";
-        if (!groups[category]) groups[category] = [];
-        groups[category].push(item);
-        return groups;
-    }, {});
+  // --- helpers ------------------------------------------
+  const grouped = menuItems.reduce((g, it) => {
+    (g[it.category] ||= []).push(it);
+    return g;
+  }, {});
 
-    // NEW: Add item to order
-    const addToOrder = (item) => {
-        setOrder(prev => ({
-            ...prev,
-            [item.id]: (prev[item.id] || 0) + 1
-        }));
+  const add = (it) =>
+    setOrder((p) => ({ ...p, [it.id]: (p[it.id] || 0) + 1 }));
+  const sub = (it) =>
+    setOrder((p) => {
+      const n = { ...p };
+      if (n[it.id]) {
+        n[it.id]--;
+        if (n[it.id] <= 0) delete n[it.id];
+      }
+      return n;
+    });
+
+  const total = Object.entries(order).reduce((sum, [id, q]) => {
+    const it = menuItems.find((m) => m.id === Number(id));
+    return sum + (it ? it.price * q : 0);
+  }, 0);
+
+  // --- place order --------------------------------------
+  const placeOrder = async () => {
+    if (!tableId || total === 0) return;
+
+    const orderedItems = Object.entries(order).map(([id, q]) => {
+      const it = menuItems.find((m) => m.id === Number(id));
+      return { name: it.name, quantity: q, price: it.price };
+    });
+
+    const payload = {
+      tableNumber: tableId,
+      orderedItems,
+      totalPrice: total,
     };
 
-    // NEW: Remove item from order
-    const removeFromOrder = (item) => {
-        setOrder(prev => {
-            const newOrder = { ...prev };
-            if (newOrder[item.id]) {
-                newOrder[item.id]--;
-                if (newOrder[item.id] <= 0) {
-                    delete newOrder[item.id];
-                }
-            }
-            return newOrder;
-        });
-    };
+    try {
+      const res = await fetch("http://localhost:8080/api/orders", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) throw new Error("failed");
+      const saved = await res.json();
+      setMessage(`Order #${saved.id} placed!`);
+      setOrder({});
+    } catch (e) {
+      setMessage("Order failed – try again.");
+    }
+  };
 
-    // NEW: Calculate total price
-    const total = Object.entries(order).reduce((sum, [id, qty]) => {
-        const item = menuItems.find(i => i.id === parseInt(id));
-        return sum + (item ? item.price * qty : 0);
-    }, 0);
+  // --- UI -----------------------------------------------
+  return (
+    <div style={{ maxWidth: 600, margin: "40px auto", fontFamily: "sans-serif" }}>
+      <h1>Table {tableId || "?"}</h1>
 
-    return (
-        <div style={{ textAlign: "center", marginTop: "30px" }}>
-            <h1>Welcome to Our Restaurant</h1>
-            {tableId ? (
-                <h2>Table: {tableId}</h2>
-            ) : (
-                <h2>No Table ID found</h2>
-            )}
-
-            <h3>Menu</h3>
-            {menuItems.length === 0 ? (
-                <p>Loading menu or no items found.</p>
-            ) : (
-                Object.entries(groupedMenu).map(([category, items]) => (
-                    <div key={category}>
-                        <h4>{category}</h4>
-                        <ul style={{ listStyleType: "none", padding: 0 }}>
-                            {items.map(item => (
-                                <li key={item.id} style={{ marginBottom: "10px" }}>
-                                    <strong>{item.name}</strong> - ${item.price.toFixed(2)}
-                                    <br />
-                                    <em>{item.description}</em>
-                                    <div style={{ marginTop: "5px" }}>
-                                        <button onClick={() => removeFromOrder(item)}>-</button>
-                                        <span style={{ margin: "0 10px" }}>
-                                            {order[item.id] || 0}
-                                        </span>
-                                        <button onClick={() => addToOrder(item)}>+</button>
-                                    </div>
-                                </li>
-                            ))}
-                        </ul>
-                    </div>
-                ))
-            )}
-
-            <h3>Total: ${total.toFixed(2)}</h3>
+      {Object.keys(grouped).map((cat) => (
+        <div key={cat}>
+          <h3>{cat}</h3>
+          {grouped[cat].map((it) => (
+            <div key={it.id} style={{ marginBottom: 10 }}>
+              <b>{it.name}</b> – ${it.price.toFixed(2)}
+              <br />
+              <small>{it.description}</small>
+              <br />
+              <button onClick={() => sub(it)}>-</button>
+              <span style={{ margin: "0 8px" }}>{order[it.id] || 0}</span>
+              <button onClick={() => add(it)}>+</button>
+            </div>
+          ))}
         </div>
-    );
-}
+      ))}
 
-export default LandingPage;
+      <h2>Total: ${total.toFixed(2)}</h2>
+      <button
+        onClick={placeOrder}
+        disabled={!tableId || total === 0}
+        style={{ padding: "10px 20px", fontSize: 16 }}
+      >
+        Place Order
+      </button>
+
+      {message && <p style={{ marginTop: 20 }}>{message}</p>}
+    </div>
+  );
+}
