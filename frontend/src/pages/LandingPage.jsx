@@ -44,14 +44,14 @@ export default function LandingPage() {
   const placeOrder = async () => {
     if (!tableId || total === 0) return;
 
-    const orderedItems = Object.entries(order).map(([id, q]) => {
+    const items = Object.entries(order).map(([id, q]) => {
       const it = menuItems.find((m) => m.id === Number(id));
       return { name: it.name, quantity: q, price: it.price };
     });
 
     const payload = {
       tableNumber: tableId,
-      orderedItems,
+      items, // 👈 important (was "orderedItems" before)
       totalPrice: total,
     };
 
@@ -63,9 +63,10 @@ export default function LandingPage() {
       });
       if (!res.ok) throw new Error("failed");
       const saved = await res.json();
-      setMessage(`Order #${saved.id} placed!`);
+      setMessage(`Order #${saved.id || saved._id || "(saved)"} placed!`);
       setOrder({});
     } catch (e) {
+      console.error(e);
       setMessage("Order failed – try again.");
     }
   };
@@ -102,6 +103,16 @@ export default function LandingPage() {
       </button>
 
       {message && <p style={{ marginTop: 20 }}>{message}</p>}
+
+      {/* --- NEW TRACK ORDER BUTTON --- */}
+      {tableId && (
+        <button
+          onClick={() => window.location.href = `/track?tableId=${tableId}`}
+          style={{ marginTop: 20, padding: "10px 20px", fontSize: 16, backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "5px" }}
+        >
+          Track My Order
+        </button>
+      )}
     </div>
   );
 }

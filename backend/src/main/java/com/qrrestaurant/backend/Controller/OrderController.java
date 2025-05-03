@@ -17,6 +17,11 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepo;
 
+
+    @GetMapping
+    public List<Order> getOrdersByTable(@RequestParam String tableNumber) {
+        return orderRepo.findByTableNumber(tableNumber);
+}
     @PostMapping
     public Order placeOrder(@Valid @RequestBody Order order) {
         // ensure initial history entry exists

@@ -28,7 +28,7 @@ public class TableController {
     public TableEntity createTable(@RequestBody TableEntity table) {
         try {
             // Construct the URL that the QR should point to
-            String url = "http://localhost:5173/order?tableId=" + table.getTableNumber();
+            String url = "http://localhost:5173/menu?tableId=" + table.getTableNumber();
 //FROM PHONE UNCOMMENT
             //yourcomp ip
             //ipconfig smth with 192.168.x.x
