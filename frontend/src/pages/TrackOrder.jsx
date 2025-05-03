@@ -12,7 +12,10 @@ function TrackOrder() {
         axios.get(`http://localhost:8080/api/orders?tableNumber=${tableNumber}`)
             .then(response => {
                 if (response.data.length > 0) {
-                    setOrder(response.data[0]);  // Latest order
+                    const latestOrder = response.data.reduce((latest, current) =>
+                        new Date(current.orderedTime) > new Date(latest.orderedTime) ? current : latest
+                    );
+                    setOrder(latestOrder);
                 }
             })
             .catch(error => console.error("Error fetching order:", error));

@@ -5,8 +5,11 @@ import com.qrrestaurant.backend.Repository.OrderRepository;
 import jakarta.validation.Valid;
 
 import java.util.List;
+import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -17,11 +20,13 @@ public class OrderController {
     @Autowired
     private OrderRepository orderRepo;
 
-
-    @GetMapping
+    // ✅ Existing: Get orders by tableNumber (used by TrackOrder.jsx)
+    @GetMapping(params = "tableNumber")
     public List<Order> getOrdersByTable(@RequestParam String tableNumber) {
         return orderRepo.findByTableNumber(tableNumber);
-}
+    }
+
+    // ✅ Existing: Place new order
     @PostMapping
     public Order placeOrder(@Valid @RequestBody Order order) {
         // ensure initial history entry exists
@@ -31,5 +36,30 @@ public class OrderController {
             );
         }
         return orderRepo.save(order);
+    }
+
+    // ✅ NEW: Get ALL orders (for KitchenPanel.jsx)
+    @GetMapping
+    public List<Order> getAllOrders() {
+        return orderRepo.findAll();
+    }
+
+    // ✅ NEW: Update order status by ID
+
+    @PutMapping("/{id}/status")
+    public ResponseEntity<String> updateOrderStatus(@PathVariable String id, @RequestBody Map<String, String> request) {
+
+        Optional<Order> optionalOrder = orderRepo.findById(id.toString());
+        if (optionalOrder.isEmpty()) {
+            return ResponseEntity.status(404).body("Order not found.");
+        }
+
+        Order order = optionalOrder.get();
+        String newStatus = request.get("status");
+
+        order.setStatus(newStatus);
+        orderRepo.save(order);
+
+        return ResponseEntity.ok("Status updated to " + newStatus);
     }
 }

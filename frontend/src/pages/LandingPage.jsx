@@ -51,7 +51,7 @@ export default function LandingPage() {
 
     const payload = {
       tableNumber: tableId,
-      items, // 👈 important (was "orderedItems" before)
+      orderedItems: items, // ✅ CORRECT FIELD NAME
       totalPrice: total,
     };
 
