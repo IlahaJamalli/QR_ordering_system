@@ -1,17 +1,10 @@
 import React, { useState } from "react";
-import bcrypt from "bcryptjs"; // ✅ ADD THIS
+import bcrypt from "bcryptjs"; // ✅ already imported
 
 function Login() {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
     const [error, setError] = useState("");
-
-    // ✅ Hash the password in the frontend for testing only
-    // let hashedPassword = "";
-    // if (password) {
-    //     const salt = bcrypt.genSaltSync(10);
-    //     hashedPassword = bcrypt.hashSync(password, salt);
-    // }
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -24,7 +17,6 @@ function Login() {
                     "Content-Type": "application/json"
                 },
                 body: JSON.stringify({ email: email.trim(), password: password.trim() })
-
             });
 
             const text = await response.text();
@@ -32,9 +24,18 @@ function Login() {
             if (response.ok && text.startsWith("Login successful")) {
                 // Save login info in localStorage
                 localStorage.setItem("staffEmail", email.trim());
-                localStorage.setItem("staffRole", text.split(", ")[1]); // Get role
+                const role = text.split(", ")[1];
+                localStorage.setItem("staffRole", role);
 
-                window.location.href = "/kitchen-panel";
+                // ✅ REDIRECT BASED ON ROLE
+                if (role === "kitchen_staff") {
+                    window.location.href = "/kitchen-panel";
+                } else if (role === "waiter") {
+                    window.location.href = "/waiter-panel";
+                } else {
+                    alert("Unknown role: " + role);
+                }
+
             } else {
                 setError(text);
             }
@@ -68,12 +69,6 @@ function Login() {
                 <button type="submit">Login</button>
             </form>
             {error && <p style={{ color: "red" }}>{error}</p>}
-
-            {/* ✅ Show hashed password for testing
-            <pre style={{ backgroundColor: "#f0f0f0", padding: "10px", marginTop: "20px" }}>
-                <strong>Hashed password (frontend test):</strong><br />
-                {hashedPassword}
-            </pre> */}
         </div>
     );
 }
