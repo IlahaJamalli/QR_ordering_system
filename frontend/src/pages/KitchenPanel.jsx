@@ -3,6 +3,8 @@ import React, { useState, useEffect } from "react";
 function KitchenPanel() {
     const [orders, setOrders] = useState([]);
     const [error, setError] = useState("");
+    const [reply, setReply] = useState({});
+
     const role = localStorage.getItem("staffRole");
     const email = localStorage.getItem("staffEmail");
 
@@ -15,7 +17,6 @@ function KitchenPanel() {
         fetch("http://localhost:8080/api/orders")
             .then((res) => res.json())
             .then((data) => {
-                // Ensure data is an array (important!)
                 if (Array.isArray(data)) {
                     setOrders(data);
                 } else {
@@ -33,7 +34,6 @@ function KitchenPanel() {
         })
             .then((res) => {
                 if (res.ok) {
-                    // Update the order status in state
                     setOrders((prev) =>
                         prev.map((order) =>
                             order.id === orderId ? { ...order, status: newStatus } : order
@@ -46,6 +46,22 @@ function KitchenPanel() {
             .catch(() => alert("Failed to update status."));
     };
 
+    const sendReply = (orderId) => {
+        const message = reply[orderId];
+        if (!message) return;
+
+        fetch(`http://localhost:8080/api/orders/${orderId}/comment`, {
+            method: "PUT",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({ comment: message, sender: "kitchen" })
+        })
+            .then(() => {
+                setReply({ ...reply, [orderId]: "" });
+                window.location.reload();
+            })
+            .catch(() => alert("Failed to send message."));
+    };
+
     if (error) return <p style={{ color: "red" }}>{error}</p>;
 
     return (
@@ -56,43 +72,40 @@ function KitchenPanel() {
             {orders.length === 0 ? (
                 <p>No orders found.</p>
             ) : (
-                <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "20px" }}>
-                    <thead>
-                        <tr>
-                            <th>Order ID</th>
-                            <th>Table</th>
-                            <th>Items</th>
-                            <th>Status</th>
-                            <th>Change Status</th>
-                        </tr>
-                    </thead>
-                    <tbody>
-                        {orders.map((order) => (
-                            <tr key={order.id}>
-                                <td>{order.id}</td>
-                                <td>{order.tableNumber}</td>
-                                <td>
-                                    {order.orderedItems
-                                        ? order.orderedItems.map((item) => item.name).join(", ")
-                                        : "No items"}
-                                </td>
-                                <td>{order.status}</td>
-                                <td>
-                                    <select
-                                        value={order.status}
-                                        onChange={(e) => updateStatus(order.id, e.target.value)}
-                                    >
-                                        <option value="Pending">Pending</option>
-                                        <option value="In Preparation">In Preparation</option>
-                                        <option value="Almost Ready">Almost Ready</option>
-                                        <option value="Ready">Ready</option>
-                                        <option value="Delivered">Delivered</option>
-                                    </select>
-                                </td>
-                            </tr>
-                        ))}
-                    </tbody>
-                </table>
+                orders.map((order) => (
+                    <div key={order.id} style={{ border: "1px solid #ccc", marginBottom: "20px", padding: "10px" }}>
+                        <h4>Order ID: {order.id} | Table: {order.tableNumber}</h4>
+                        <p>Status: {order.status}</p>
+                        <select value={order.status} onChange={(e) => updateStatus(order.id, e.target.value)}>
+                            <option value="Pending">Pending</option>
+                            <option value="In Preparation">In Preparation</option>
+                            <option value="Almost Ready">Almost Ready</option>
+                            <option value="Ready">Ready</option>
+                            <option value="Delivered">Delivered</option>
+                        </select>
+
+                        <p><strong>Items:</strong> {order.orderedItems.map(item => item.name).join(", ")}</p>
+
+                        <h5>Chat History:</h5>
+                        <div style={{ border: "1px solid #eee", padding: "5px", maxHeight: "150px", overflowY: "auto" }}>
+                            {order.commentsHistory && order.commentsHistory.map((c, idx) => (
+                                <div key={idx}>
+                                    <b>{c.sender}:</b> {c.message} ({new Date(c.timestamp).toLocaleString()})
+                                </div>
+                            ))}
+                            {!order.commentsHistory?.length && <p>No comments yet.</p>}
+                        </div>
+
+                        <textarea
+                            rows="2"
+                            style={{ width: "100%", marginTop: "5px" }}
+                            value={reply[order.id] || ""}
+                            onChange={(e) => setReply({ ...reply, [order.id]: e.target.value })}
+                            placeholder="Reply to customer..."
+                        />
+                        <button onClick={() => sendReply(order.id)}>Send Reply</button>
+                    </div>
+                ))
             )}
         </div>
     );

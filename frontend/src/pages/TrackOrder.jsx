@@ -2,11 +2,11 @@ import React, { useEffect, useState } from 'react';
 import axios from 'axios';
 
 function TrackOrder() { 
-    // Automatically read tableId from URL parameters
     const searchParams = new URLSearchParams(window.location.search);
-    const tableNumber = searchParams.get("tableId") || "A1"; // fallback if missing
+    const tableNumber = searchParams.get("tableId") || "A1";
 
     const [order, setOrder] = useState(null);
+    const [newComment, setNewComment] = useState("");
 
     useEffect(() => {
         axios.get(`http://localhost:8080/api/orders?tableNumber=${tableNumber}`)
@@ -32,6 +32,19 @@ function TrackOrder() {
         }
     };
 
+    const submitNewComment = () => {
+        if (!newComment.trim()) return;
+        axios.put(`http://localhost:8080/api/orders/${order.id}/comment`, { 
+            comment: newComment,
+            sender: "customer"
+        })
+            .then(() => {
+                setNewComment("");
+                window.location.reload();
+            })
+            .catch(err => console.error(err));
+    };
+
     return (
         <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px', fontFamily: 'Arial' }}>
             <h2>Track Your Order</h2>
@@ -55,14 +68,31 @@ function TrackOrder() {
 
                     <h4>Total Price: ${order.totalPrice.toFixed(2)}</h4>
 
-                    <h4>Order History:</h4>
-                    <ul>
-                        {order.history.map((entry, index) => (
-                            <li key={index}>
-                                <strong>{entry.status}</strong> at {new Date(entry.timestamp).toLocaleString()}
-                            </li>
+                    <h4>Chat with Kitchen:</h4>
+                    <div style={{ maxHeight: "200px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", marginBottom: "10px" }}>
+                        {order.commentsHistory && order.commentsHistory.map((c, idx) => (
+                            <div key={idx} style={{ 
+                                textAlign: c.sender === "customer" ? "right" : "left",
+                                backgroundColor: c.sender === "customer" ? "#e1f5fe" : "#ffe0b2",
+                                margin: "5px",
+                                padding: "5px",
+                                borderRadius: "5px"
+                            }}>
+                                <b>{c.sender}:</b> {c.message} <br/>
+                                <small>{new Date(c.timestamp).toLocaleString()}</small>
+                            </div>
                         ))}
-                    </ul>
+                        {!order.commentsHistory?.length && <p>No comments yet.</p>}
+                    </div>
+
+                    <textarea 
+                        value={newComment} 
+                        onChange={(e) => setNewComment(e.target.value)} 
+                        rows="2" 
+                        style={{ width: "100%" }}
+                        placeholder="Type your message to the kitchen..."
+                    />
+                    <button onClick={submitNewComment} style={{ marginTop: "5px" }}>Send Message</button>
                 </div>
             )}
         </div>

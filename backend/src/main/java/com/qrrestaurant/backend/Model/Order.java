@@ -2,12 +2,12 @@ package com.qrrestaurant.backend.Model;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.Data;
-
 import org.springframework.data.annotation.Id;
 import org.springframework.data.mongodb.core.mapping.Document;
 
 import java.time.Instant;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 
 @Data
@@ -25,16 +25,16 @@ public class Order {
 
     private double totalPrice;
 
-    private String status = "Pending";        // Pending ▸ In Preparation ▸ Ready ▸ Delivered
+    private String status = "Pending";
     private Instant orderedTime = Instant.now();
     private String customerComments = "";
 
     private List<HistoryLine> history = List.of(new HistoryLine("Pending", orderedTime));
 
-    // --- getters & setters (or Lombok @Data) -------------
-    // (omitted for brevity)
-    // ------------------------------------------------------
+    // ✅ New: Chat comment history
+    private List<Comment> commentsHistory = new ArrayList<>();
 
     public record ItemLine(String name, int quantity, double price) {}
     public record HistoryLine(String status, Instant timestamp) {}
+    public record Comment(String sender, String message, Date timestamp) {}
 }

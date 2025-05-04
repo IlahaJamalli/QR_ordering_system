@@ -7,11 +7,11 @@ function Login() {
     const [error, setError] = useState("");
 
     // ✅ Hash the password in the frontend for testing only
-    let hashedPassword = "";
-    if (password) {
-        const salt = bcrypt.genSaltSync(10);
-        hashedPassword = bcrypt.hashSync(password, salt);
-    }
+    // let hashedPassword = "";
+    // if (password) {
+    //     const salt = bcrypt.genSaltSync(10);
+    //     hashedPassword = bcrypt.hashSync(password, salt);
+    // }
 
     const handleLogin = async (e) => {
         e.preventDefault();
@@ -69,11 +69,11 @@ function Login() {
             </form>
             {error && <p style={{ color: "red" }}>{error}</p>}
 
-            {/* ✅ Show hashed password for testing */}
+            {/* ✅ Show hashed password for testing
             <pre style={{ backgroundColor: "#f0f0f0", padding: "10px", marginTop: "20px" }}>
                 <strong>Hashed password (frontend test):</strong><br />
                 {hashedPassword}
-            </pre>
+            </pre> */}
         </div>
     );
 }

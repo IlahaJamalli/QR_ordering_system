@@ -1,10 +1,12 @@
 import React, { useEffect, useState } from "react";
+import "./LandingPage.css"; // ✅ we'll create this CSS file
 
 export default function LandingPage() {
   const [tableId, setTableId] = useState("");
   const [menuItems, setMenuItems] = useState([]);
   const [order, setOrder] = useState({});            // {itemId: qty}
   const [message, setMessage] = useState("");
+  const [comments, setComments] = useState("");       // ✅ NEW
 
   // --- load table id & menu -----------------------------
   useEffect(() => {
@@ -51,8 +53,9 @@ export default function LandingPage() {
 
     const payload = {
       tableNumber: tableId,
-      orderedItems: items, // ✅ CORRECT FIELD NAME
+      orderedItems: items,
       totalPrice: total,
+      customerComments: comments   // ✅ NEW field
     };
 
     try {
@@ -65,6 +68,7 @@ export default function LandingPage() {
       const saved = await res.json();
       setMessage(`Order #${saved.id || saved._id || "(saved)"} placed!`);
       setOrder({});
+      setComments("");  // ✅ reset comment box
     } catch (e) {
       console.error(e);
       setMessage("Order failed – try again.");
@@ -73,20 +77,20 @@ export default function LandingPage() {
 
   // --- UI -----------------------------------------------
   return (
-    <div style={{ maxWidth: 600, margin: "40px auto", fontFamily: "sans-serif" }}>
+    <div className="landing-container">
       <h1>Table {tableId || "?"}</h1>
 
       {Object.keys(grouped).map((cat) => (
-        <div key={cat}>
+        <div key={cat} className="category">
           <h3>{cat}</h3>
           {grouped[cat].map((it) => (
-            <div key={it.id} style={{ marginBottom: 10 }}>
+            <div key={it.id} className="menu-item">
               <b>{it.name}</b> – ${it.price.toFixed(2)}
               <br />
               <small>{it.description}</small>
               <br />
               <button onClick={() => sub(it)}>-</button>
-              <span style={{ margin: "0 8px" }}>{order[it.id] || 0}</span>
+              <span className="quantity">{order[it.id] || 0}</span>
               <button onClick={() => add(it)}>+</button>
             </div>
           ))}
@@ -94,21 +98,28 @@ export default function LandingPage() {
       ))}
 
       <h2>Total: ${total.toFixed(2)}</h2>
+
+      <textarea
+        placeholder="Add special instructions for the kitchen..."
+        value={comments}
+        onChange={(e) => setComments(e.target.value)}
+        className="comments-box"
+      />
+
       <button
         onClick={placeOrder}
         disabled={!tableId || total === 0}
-        style={{ padding: "10px 20px", fontSize: 16 }}
+        className="place-order-btn"
       >
         Place Order
       </button>
 
-      {message && <p style={{ marginTop: 20 }}>{message}</p>}
+      {message && <p className="message">{message}</p>}
 
-      {/* --- NEW TRACK ORDER BUTTON --- */}
       {tableId && (
         <button
           onClick={() => window.location.href = `/track?tableId=${tableId}`}
-          style={{ marginTop: 20, padding: "10px 20px", fontSize: 16, backgroundColor: "#4CAF50", color: "white", border: "none", borderRadius: "5px" }}
+          className="track-order-btn"
         >
           Track My Order
         </button>
