@@ -23,4 +23,11 @@ public class MenuItemController {
     public MenuItem createMenuItem(@RequestBody MenuItem item) {
         return menuItemRepository.save(item);
     }
+
+    @GetMapping("/{id}")
+    public MenuItem getMenuItemById(@PathVariable Long id) {
+        return menuItemRepository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+    }
+
 }

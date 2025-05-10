@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import "./LandingPage.css"; // ✅ we'll create this CSS file
+import "./LandingPage.css"; // ✅ CSS stays the same
 
 export default function LandingPage() {
   const [tableId, setTableId] = useState("");
@@ -11,12 +11,33 @@ export default function LandingPage() {
   // --- load table id & menu -----------------------------
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
-    setTableId(params.get("tableId") || "");
+    let id = params.get("tableId");
+
+    // ✅ If no ?tableId param, try to get from the URL path like /menu/table/5
+    if (!id) {
+      const pathParts = window.location.pathname.split("/");
+      const index = pathParts.findIndex(p => p === "table");
+      if (index !== -1 && pathParts[index + 1]) {
+        id = pathParts[index + 1];
+      }
+    }
+
+    // ✅ If still no ID, try to get from localStorage (returning customer)
+    if (!id) {
+      id = localStorage.getItem("tableNumber") || "";
+    }
+
+    setTableId(id);
+
+    // ✅ Save to localStorage so future pages can use it
+    if (id) {
+      localStorage.setItem("tableNumber", id);
+    }
 
     fetch("http://localhost:8080/api/menu")
-      .then((res) => res.json())
-      .then(setMenuItems)
-      .catch((err) => console.error(err));
+        .then((res) => res.json())
+        .then(setMenuItems)
+        .catch((err) => console.error(err));
   }, []);
 
   // --- helpers ------------------------------------------
@@ -26,16 +47,16 @@ export default function LandingPage() {
   }, {});
 
   const add = (it) =>
-    setOrder((p) => ({ ...p, [it.id]: (p[it.id] || 0) + 1 }));
+      setOrder((p) => ({ ...p, [it.id]: (p[it.id] || 0) + 1 }));
   const sub = (it) =>
-    setOrder((p) => {
-      const n = { ...p };
-      if (n[it.id]) {
-        n[it.id]--;
-        if (n[it.id] <= 0) delete n[it.id];
-      }
-      return n;
-    });
+      setOrder((p) => {
+        const n = { ...p };
+        if (n[it.id]) {
+          n[it.id]--;
+          if (n[it.id] <= 0) delete n[it.id];
+        }
+        return n;
+      });
 
   const total = Object.entries(order).reduce((sum, [id, q]) => {
     const it = menuItems.find((m) => m.id === Number(id));
@@ -77,53 +98,53 @@ export default function LandingPage() {
 
   // --- UI -----------------------------------------------
   return (
-    <div className="landing-container">
-      <h1>Table {tableId || "?"}</h1>
+      <div className="landing-container">
+        <h1>Table {tableId || "?"}</h1>
 
-      {Object.keys(grouped).map((cat) => (
-        <div key={cat} className="category">
-          <h3>{cat}</h3>
-          {grouped[cat].map((it) => (
-            <div key={it.id} className="menu-item">
-              <b>{it.name}</b> – ${it.price.toFixed(2)}
-              <br />
-              <small>{it.description}</small>
-              <br />
-              <button onClick={() => sub(it)}>-</button>
-              <span className="quantity">{order[it.id] || 0}</span>
-              <button onClick={() => add(it)}>+</button>
+        {Object.keys(grouped).map((cat) => (
+            <div key={cat} className="category">
+              <h3>{cat}</h3>
+              {grouped[cat].map((it) => (
+                  <div key={it.id} className="menu-item">
+                    <b>{it.name}</b> – ${it.price.toFixed(2)}
+                    <br />
+                    <small>{it.description}</small>
+                    <br />
+                    <button onClick={() => sub(it)}>-</button>
+                    <span className="quantity">{order[it.id] || 0}</span>
+                    <button onClick={() => add(it)}>+</button>
+                  </div>
+              ))}
             </div>
-          ))}
-        </div>
-      ))}
+        ))}
 
-      <h2>Total: ${total.toFixed(2)}</h2>
+        <h2>Total: ${total.toFixed(2)}</h2>
 
-      <textarea
-        placeholder="Add special instructions for the kitchen..."
-        value={comments}
-        onChange={(e) => setComments(e.target.value)}
-        className="comments-box"
-      />
+        <textarea
+            placeholder="Add special instructions for the kitchen..."
+            value={comments}
+            onChange={(e) => setComments(e.target.value)}
+            className="comments-box"
+        />
 
-      <button
-        onClick={placeOrder}
-        disabled={!tableId || total === 0}
-        className="place-order-btn"
-      >
-        Place Order
-      </button>
-
-      {message && <p className="message">{message}</p>}
-
-      {tableId && (
         <button
-          onClick={() => window.location.href = `/track?tableId=${tableId}`}
-          className="track-order-btn"
+            onClick={placeOrder}
+            disabled={!tableId || total === 0}
+            className="place-order-btn"
         >
-          Track My Order
+          Place Order
         </button>
-      )}
-    </div>
+
+        {message && <p className="message">{message}</p>}
+
+        {tableId && (
+            <button
+                onClick={() => window.location.href = `/track?tableId=${tableId}`}
+                className="track-order-btn"
+            >
+              Track My Order
+            </button>
+        )}
+      </div>
   );
 }

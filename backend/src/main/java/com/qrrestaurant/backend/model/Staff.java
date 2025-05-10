@@ -1,4 +1,4 @@
-package com.qrrestaurant.backend.Model;
+package com.qrrestaurant.backend.model;
 
 import jakarta.persistence.*;
 import lombok.*;

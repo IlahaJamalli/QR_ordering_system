@@ -1,7 +1,7 @@
 package com.qrrestaurant.backend.util;
 
-import com.qrrestaurant.backend.Model.Staff;
-import com.qrrestaurant.backend.Repository.StaffRepository;
+import com.qrrestaurant.backend.model.Staff;
+import com.qrrestaurant.backend.repository.StaffRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;

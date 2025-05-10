@@ -1,6 +1,6 @@
-package com.qrrestaurant.backend.Repository;
+package com.qrrestaurant.backend.repository;
 
-import com.qrrestaurant.backend.Model.Staff;
+import com.qrrestaurant.backend.model.Staff;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.Optional;

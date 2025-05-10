@@ -1,7 +1,7 @@
 package com.qrrestaurant.backend.Controller;
 
-import com.qrrestaurant.backend.Model.Staff;
-import com.qrrestaurant.backend.Repository.StaffRepository;
+import com.qrrestaurant.backend.model.Staff;
+import com.qrrestaurant.backend.repository.StaffRepository;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.web.bind.annotation.*;

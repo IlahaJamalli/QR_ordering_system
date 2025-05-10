@@ -19,6 +19,7 @@ function Login() {
                 body: JSON.stringify({ email: email.trim(), password: password.trim() })
             });
 
+            console.log(response)
             const text = await response.text();
 
             if (response.ok && text.startsWith("Login successful")) {
@@ -32,6 +33,8 @@ function Login() {
                     window.location.href = "/kitchen-panel";
                 } else if (role === "waiter") {
                     window.location.href = "/waiter-panel";
+                } else if (role === "manager") {
+                    window.location.href = "/manager-panel";
                 } else {
                     alert("Unknown role: " + role);
                 }
