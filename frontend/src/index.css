@@ -5,13 +5,121 @@
 
   color-scheme: light dark;
   color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
+  background-color: #f7eeee;
 
   font-synthesis: none;
   text-rendering: optimizeLegibility;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
 }
+/* ======================================================================
+   GLOBAL BASE (mobile-first, light-by-default)
+   ==================================================================== */
+:root {
+  --font-body: system-ui, Avenir, Helvetica, Arial, sans-serif;
+  --text-main: #1f2937;
+  --text-link: #4f46e5;
+  --text-link-hover: #4338ca;
+  --bg-main: #f8fafc;          /* soft very-light slate */
+  --btn-bg: #eeeeee;
+  --btn-bg-hover: #e2e8f0;
+  --btn-text: #1f2937;
+  --border-radius: 20px;
+
+  font-family: var(--font-body);
+  line-height: 1.5;
+  font-weight: 400;
+  color: var(--text-main);
+  background: var(--bg-main);
+
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+/* ---------- automatic dark mode ---------- */
+@media (prefers-color-scheme: dark) {
+  :root {
+    --text-main: #e2e8f0;
+    --bg-main: #eecca0c1;
+    --btn-bg: #2b2b2b;
+    --btn-bg-hover: #3b3b3b;
+    --text-link: #8b8bff;
+    --text-link-hover: #b0b0ff;
+  }
+}
+
+/* ====================================================================== */
+/* BASIC TAG PRESETS                                                      */
+/* ====================================================================== */
+html, body {
+  margin: 0;
+  padding: 0;
+  min-height: 100%;
+}
+
+body {
+  min-width: 320px;          /* prevent ultra-narrow collapse on micro devices */
+}
+
+/* headings */
+h1, h2, h3, h4, h5, h6 {
+  font-weight: 700;
+  margin: 0 0 .6em;
+  line-height: 1.2;
+}
+h1 { font-size: clamp(2rem, 6vw, 3rem); }
+
+/* links */
+a {
+  color: var(--text-link);
+  text-decoration: none;
+  transition: color 0.15s;
+  font-weight: 500;
+}
+a:hover { color: var(--text-link-hover); }
+
+/* buttons */
+button {
+  cursor: pointer;
+  font-family: inherit;
+  font-size: 1rem;
+  font-weight: 500;
+  padding: 0.6em 1.2em;
+  color: var(--btn-text);
+  background: var(--btn-bg);
+  border: 1px solid transparent;
+  border-radius: var(--border-radius);
+  transition: background 0.2s, border-color 0.2s;
+}
+button:hover   { background: var(--btn-bg-hover); }
+button:focus-visible {
+  outline: 3px solid var(--text-link);
+  outline-offset: 1px;
+}
+
+/* utility: a simple “card” look you can reuse */
+.card {
+  background: #ffffff;
+  border: 1px solid #e2e8f0;
+  border-radius: 14px;
+  padding: 1.5rem 2rem;
+  box-shadow: 0 4px 16px rgba(0,0,0,.06);
+}
+
+/* demo helper (same as Vite template if you still use it) */
+.read-the-docs { color: #888; }
+
+/* ======================================================================
+   OPTIONAL – spin animation for the Vite / React logos
+   ==================================================================== */
+@keyframes logo-spin { from { transform:rotate(0deg) } to { transform:rotate(360deg) } }
+@media (prefers-reduced-motion: no-preference) {
+  a:nth-of-type(2) .logo { animation: logo-spin infinite 20s linear; }
+}
+.logo       { height: 6em; padding: 1.5em; transition: filter 300ms; }
+.logo:hover { filter: drop-shadow(0 0 2em #646cffaa); }
+.logo.react:hover { filter: drop-shadow(0 0 2em #61dafbaa); }
 
 a {
   font-weight: 500;

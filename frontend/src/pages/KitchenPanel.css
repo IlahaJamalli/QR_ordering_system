@@ -1,0 +1,134 @@
+.kitchen-wrapper {
+  min-height: 100vh;
+  padding: 0;
+  margin: 0;
+   background: url("./css/imgs/back5.jpg") no-repeat center fixed;
+  font-family: "Segoe UI", sans-serif;
+  display: flex;
+  justify-content: center;
+  align-items: flex-start;
+}
+.kitchen-panel {
+  background: rgba(222, 165, 108, 0.55)y;
+  padding: 30px;
+  font-family: "Segoe UI", sans-serif;
+  min-height: 100vh;
+}
+
+h2 {
+  text-align: center;
+  color: #333;
+  font-size: 2rem;
+  margin-bottom: 1.5rem;
+}
+
+.order-card {
+  background: rgba(255, 255, 255, 0.55); /* white with 20% opacity */
+  border-radius: 10px;
+  padding: 20px;
+  margin-bottom: 25px;
+  box-shadow: 0 6px 14px rgba(0, 0, 0, 0.2);
+  backdrop-filter: blur(6px); /* optional: adds a frosted glass effect */
+}
+
+.order-meta {
+  font-size: 0.9rem;
+  margin-bottom: 10px;
+  color: #555;
+}
+
+.order-items {
+  font-size: 1rem;
+  margin-bottom: 10px;
+  color: #222;
+}
+
+.order-controls {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 15px;
+  color: #218838;
+}
+
+.order-controls select {
+  padding: 5px 10px;
+  font-size: 1rem;
+  border-radius: 5px;
+  border: 1px solid #ccc;
+}
+
+.order-controls button {
+  padding: 8px 14px;
+  font-size: 1rem;
+  border: none;
+  background-color: #28a745;
+  color: white;
+  border-radius: 6px;
+  transition: background-color 0.3s;
+}
+.order-controls button:hover {
+  background-color: #218838;
+}
+
+.chat-box {
+  background: #f4f4f4;
+  padding: 12px;
+  border-radius: 8px;
+}
+
+.chat-history {
+  max-height: 120px;
+  overflow-y: auto;
+  background: #eaeaea;
+  padding: 10px;
+  margin: 10px 0;
+  border-radius: 6px;
+}
+
+.chat-bubble {
+  padding: 6px;
+  margin-bottom: 5px;
+  border-radius: 6px;
+  font-size: 0.9rem;
+}
+.chat-bubble.customer {
+  background: #e0f2ff;
+  color: #0077cc;
+}
+.chat-bubble.kitchen {
+  background: #d4f8e8;
+  color: #219653;
+}
+
+.chat-box textarea {
+  width: 100%;
+  padding: 10px;
+  border-radius: 5px;
+  font-size: 1rem;
+  margin-bottom: 10px;
+  border: 1px solid #ccc;
+  resize: vertical;
+}
+
+.send-btn {
+  background-color: #007bff;
+  color: white;
+  padding: 10px 16px;
+  font-size: 1rem;
+  border: none;
+  border-radius: 6px;
+}
+.send-btn:hover {
+  background-color: #0056b3;
+}
+.send-btn:disabled {
+  background-color: #cccccc;
+  cursor: not-allowed;
+}
+
+.dimmed {
+  text-align: center;
+  font-style: italic;
+  color: #888;
+}

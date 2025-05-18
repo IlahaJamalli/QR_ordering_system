@@ -1,102 +1,151 @@
-import React, { useEffect, useState } from 'react';
-import axios from 'axios';
+import React, { useEffect, useState } from "react";
+import axios from "axios";
+import "./TrackOrder.css";   // ← make sure this path is correct
 
-function TrackOrder() { 
-    const searchParams = new URLSearchParams(window.location.search);
-    const tableNumber = searchParams.get("tableId") || "A1";
+export default function TrackOrder() {
+  /* — table ID from URL — */
+  const tableNumber =
+    new URLSearchParams(window.location.search).get("tableId") || "A1";
 
-    const [order, setOrder] = useState(null);
-    const [newComment, setNewComment] = useState("");
+  /* — state — */
+  const [order,   setOrder]   = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [text,    setText]    = useState("");
 
-    useEffect(() => {
-        axios.get(`http://localhost:8080/api/orders?tableNumber=${tableNumber}`)
-            .then(response => {
-                if (response.data.length > 0) {
-                    const latestOrder = response.data.reduce((latest, current) =>
-                        new Date(current.orderedTime) > new Date(latest.orderedTime) ? current : latest
-                    );
-                    setOrder(latestOrder);
-                }
-            })
-            .catch(error => console.error("Error fetching order:", error));
-    }, [tableNumber]);
-
-    const getStatusColor = (status) => {
-        switch (status) {
-            case 'Pending': return 'orange';
-            case 'In Preparation': return 'blue';
-            case 'Almost Ready': return 'purple';
-            case 'Ready': return 'green';
-            case 'Delivered': return 'gray';
-            default: return 'black';
+  /* — fetch latest order for this table — */
+  useEffect(() => {
+    axios
+      .get(`http://localhost:8080/api/orders?tableNumber=${tableNumber}`)
+      .then((r) => {
+        if (r.data.length) {
+          const latest = r.data.reduce((a, b) =>
+            new Date(b.orderedTime) > new Date(a.orderedTime) ? b : a
+          );
+          setOrder(latest);
         }
-    };
+      })
+      .catch(console.error)
+      .finally(() => setLoading(false));
+  }, [tableNumber]);
 
-    const submitNewComment = () => {
-        if (!newComment.trim()) return;
-        axios.put(`http://localhost:8080/api/orders/${order.id}/comment`, { 
-            comment: newComment,
-            sender: "customer"
-        })
-            .then(() => {
-                setNewComment("");
-                window.location.reload();
-            })
-            .catch(err => console.error(err));
-    };
+  /* — helper: format dd MMM, hh:mm AM/PM — */
+  const fmt = (d) =>
+    new Intl.DateTimeFormat(undefined, {
+      day: "2-digit",
+      month: "short",
+      hour: "2-digit",
+      minute: "2-digit",
+    }).format(new Date(d));
 
-    return (
-        <div style={{ maxWidth: '600px', margin: 'auto', padding: '20px', fontFamily: 'Arial' }}>
-            <h2>Track Your Order</h2>
+  /* — status → colour — */
+  const hue = {
+    Pending: "#f97316",
+    "In Preparation": "#3b82f6",
+    "Almost Ready": "#a855f7",
+    Ready: "#22c55e",
+    Delivered: "#6b7280",
+  };
 
-            {!order && <p>Loading order details...</p>}
+  /* — send chat message — */
+  const send = () => {
+    if (!text.trim()) return;
+    axios
+      .put(`http://localhost:8080/api/orders/${order.id}/comment`, {
+        sender: "customer",
+        comment: text.trim(),
+      })
+      .then(() => {
+        setOrder((o) => ({
+          ...o,
+          commentsHistory: [
+            ...(o.commentsHistory || []),
+            { sender: "customer", message: text.trim(), timestamp: new Date() },
+          ],
+        }));
+        setText("");
+      })
+      .catch(console.error);
+  };
 
-            {order && (
-                <div style={{ border: '1px solid #ccc', borderRadius: '10px', padding: '20px' }}>
-                    <h3>Table: {order.tableNumber}</h3>
-                    <p><strong>Status:</strong> <span style={{ color: getStatusColor(order.status) }}>{order.status}</span></p>
-                    <p><strong>Ordered Time:</strong> {new Date(order.orderedTime).toLocaleString()}</p>
+  /* — UI — */
+  return (
+    <div className="track-bg">
+      <div className="track-wrap">
+        <h2 className="pageTitle">Track Your Order</h2>
 
-                    <h4>Items:</h4>
-                    <ul>
-                        {order.orderedItems.map((item, index) => (
-                            <li key={index}>
-                                {item.name} x {item.quantity} — ${(item.price * item.quantity).toFixed(2)}
-                            </li>
-                        ))}
-                    </ul>
+        {loading && <div className="loader" />}
 
-                    <h4>Total Price: ${order.totalPrice.toFixed(2)}</h4>
+        {!loading && !order && <p className="dim">No orders found.</p>}
 
-                    <h4>Chat with Kitchen:</h4>
-                    <div style={{ maxHeight: "200px", overflowY: "auto", border: "1px solid #ddd", padding: "10px", marginBottom: "10px" }}>
-                        {order.commentsHistory && order.commentsHistory.map((c, idx) => (
-                            <div key={idx} style={{ 
-                                textAlign: c.sender === "customer" ? "right" : "left",
-                                backgroundColor: c.sender === "customer" ? "#e1f5fe" : "#ffe0b2",
-                                margin: "5px",
-                                padding: "5px",
-                                borderRadius: "5px"
-                            }}>
-                                <b>{c.sender}:</b> {c.message} <br/>
-                                <small>{new Date(c.timestamp).toLocaleString()}</small>
-                            </div>
-                        ))}
-                        {!order.commentsHistory?.length && <p>No comments yet.</p>}
-                    </div>
+        {order && (
+          <div className="card">
+            {/* header */}
+            <div className="row between">
+              <h3>Table&nbsp;{order.tableNumber}</h3>
+              <span
+                className="badge"
+                style={{ background: hue[order.status] || "#94a3b8" }}
+              >
+                {order.status}
+              </span>
+            </div>
 
-                    <textarea 
-                        value={newComment} 
-                        onChange={(e) => setNewComment(e.target.value)} 
-                        rows="2" 
-                        style={{ width: "100%" }}
-                        placeholder="Type your message to the kitchen..."
-                    />
-                    <button onClick={submitNewComment} style={{ marginTop: "5px" }}>Send Message</button>
+            <p className="dim time">Ordered&nbsp;{fmt(order.orderedTime)}</p>
+
+            {/* items */}
+            <h4 className="secHead">Items</h4>
+            <ul className="items">
+              {order.orderedItems.map((it, i) => (
+                <li key={i}>
+                  {it.name} × {it.quantity}
+                  <span>${(it.price * it.quantity).toFixed(2)}</span>
+                </li>
+              ))}
+            </ul>
+
+            <div className="row between totalRow">
+              <h4>Total</h4>
+              <h4>${order.totalPrice.toFixed(2)}</h4>
+            </div>
+
+            {/* chat */}
+            <h4 className="secHead" style={{ marginTop: "22px" }}>
+              Chat with Kitchen
+            </h4>
+
+            <div className="chatBox">
+              {(order.commentsHistory || []).map((c, i) => (
+                <div
+                  key={i}
+                  className={`bubble ${c.sender === "customer" ? "me" : "them"}`}
+                >
+                  <b className="sender">
+                    {c.sender === "customer" ? "Customer" : "Kitchen"}:
+                  </b>{" "}
+                  {c.message}
+                  <small className="ts">{fmt(c.timestamp)}</small>
                 </div>
-            )}
-        </div>
-    );
-}
+              ))}
+              {!order.commentsHistory?.length && (
+                <p className="dim">No comments yet.</p>
+              )}
+            </div>
 
-export default TrackOrder;
+            {/* send bar */}
+            <div className="sendBar">
+              <textarea
+                rows="1"
+                value={text}
+                onChange={(e) => setText(e.target.value)}
+                placeholder="Type your message…"
+              />
+              <button onClick={send} disabled={!text.trim()}>
+                Send
+              </button>
+            </div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}

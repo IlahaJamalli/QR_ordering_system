@@ -6,6 +6,7 @@ import KitchenPanel from "./pages/KitchenPanel";
 import WaiterPanel from "./pages/WaiterPanel";
 import KitchenMessages from "./pages/KitchenMessages";
 import ManagerPanel from "./pages/ManagerPanel"; // ✅ NEW import
+import "./App.css";
 
 function App() {
   const path = window.location.pathname;

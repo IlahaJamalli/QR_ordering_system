@@ -29,12 +29,48 @@ public class Order {
     private Instant orderedTime = Instant.now();
     private String customerComments = "";
 
-    private List<HistoryLine> history = List.of(new HistoryLine("Pending", orderedTime));
+    private List<HistoryLine> history = new ArrayList<>(List.of(new HistoryLine("Pending", orderedTime)));
 
     // ✅ New: Chat comment history
     private List<Comment> commentsHistory = new ArrayList<>();
 
-    public record ItemLine(String name, int quantity, double price) {}
-    public record HistoryLine(String status, Instant timestamp) {}
-    public record Comment(String sender, String message, Date timestamp) {}
+    @Data
+    public static class ItemLine {
+        private String name;
+        private int quantity;
+        private double price;
+
+        public ItemLine() {} // needed by Spring
+        public ItemLine(String name, int quantity, double price) {
+            this.name = name;
+            this.quantity = quantity;
+            this.price = price;
+        }
+    }
+
+    @Data
+    public static class HistoryLine {
+        private String status;
+        private Instant timestamp;
+
+        public HistoryLine() {} // needed by Spring
+        public HistoryLine(String status, Instant timestamp) {
+            this.status = status;
+            this.timestamp = timestamp;
+        }
+    }
+
+    @Data
+    public static class Comment {
+        private String sender;
+        private String message;
+        private Date timestamp;
+
+        public Comment() {} // needed by Spring
+        public Comment(String sender, String message, Date timestamp) {
+            this.sender = sender;
+            this.message = message;
+            this.timestamp = timestamp;
+        }
+    }
 }

@@ -6,34 +6,47 @@ import com.google.zxing.WriterException;
 import com.google.zxing.client.j2se.MatrixToImageWriter;
 import com.google.zxing.qrcode.QRCodeWriter;
 import com.google.zxing.common.BitMatrix;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.stereotype.Component;
 
-import java.io.File;
 import java.io.IOException;
-import java.nio.file.FileSystems;
+import java.nio.file.Files;
 import java.nio.file.Path;
+import java.nio.file.Paths;
 import java.util.HashMap;
 import java.util.Map;
 
+@Component
 public class QrCodeGenerator {
 
-    public static String generateQRCodeImage(String text, String fileName) throws WriterException, IOException {
-        int width = 350;
-        int height = 350;
-        String filePath = "qrcodes/" + fileName + ".png";
+    @Value("${qr.codes.directory:qr-codes}")
+    private String qrCodesDirectory;
 
+    public void generateQRCodeImage(String text, String fileName) throws IOException, WriterException {
+        if (text == null || text.trim().isEmpty()) {
+            throw new IllegalArgumentException("Text cannot be null or empty");
+        }
+        if (fileName == null || fileName.trim().isEmpty()) {
+            throw new IllegalArgumentException("File name cannot be null or empty");
+        }
+
+        // Create QR codes directory if it doesn't exist
+        Path qrCodesPath = Paths.get(qrCodesDirectory);
+        if (!Files.exists(qrCodesPath)) {
+            Files.createDirectories(qrCodesPath);
+        }
+
+        // Generate QR code
         QRCodeWriter qrCodeWriter = new QRCodeWriter();
+        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, 200, 200);
 
-        Map<EncodeHintType, Object> hints = new HashMap<>();
-        hints.put(EncodeHintType.MARGIN, 1);  // Less white border
+        // Write QR code to file
+        Path filePath = qrCodesPath.resolve(fileName);
+        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", filePath);
+    }
 
-        BitMatrix bitMatrix = qrCodeWriter.encode(text, BarcodeFormat.QR_CODE, width, height, hints);
-
-        Path path = FileSystems.getDefault().getPath(filePath);
-        File dir = new File("qrcodes");
-        if (!dir.exists()) dir.mkdirs();  // Create folder if not exist
-
-        MatrixToImageWriter.writeToPath(bitMatrix, "PNG", path);
-
-        return filePath;
+    // For testing purposes
+    void setQrCodesDirectory(String directory) {
+        this.qrCodesDirectory = directory;
     }
 }

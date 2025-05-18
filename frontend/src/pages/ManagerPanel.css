@@ -1,0 +1,112 @@
+.manager-panel-container {
+  max-width: 1100px;
+  margin: 40px auto;
+  padding: 25px;
+  border-radius: 14px;
+  background: rgba(255, 255, 255, 0.82);
+  box-shadow: 0 8px 24px rgba(0, 0, 0, 0.1);
+  backdrop-filter: blur(10px);
+  font-family: "Segoe UI", Tahoma, sans-serif;
+}
+
+.manager-panel-container h2 {
+  text-align: center;
+  font-size: 2.2rem;
+  margin-bottom: 10px;
+  color: #1f2937;
+}
+
+.manager-panel-container p {
+  font-size: 1rem;
+  text-align: center;
+  color: #555;
+  margin-bottom: 20px;
+}
+
+.manager-panel-container table {
+  width: 100%;
+  border-collapse: collapse;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 6px 16px rgba(0, 0, 0, 0.08);
+}
+
+.manager-panel-container th {
+  background-color: #f9fafb;
+  color: #1f2937;
+  font-weight: 600;
+  padding: 14px;
+  text-align: left;
+  font-size: 15px;
+  border-bottom: 1px solid #e5e7eb;
+}
+
+.manager-panel-container td {
+  padding: 12px 14px;
+  font-size: 14px;
+  border-bottom: 1px solid #f1f1f1;
+  color: #374151;
+}
+
+.manager-panel-container tbody tr:hover {
+  background-color: #f3f4f6;
+  transition: background 0.25s ease;
+}
+
+.status-badge {
+  display: inline-block;
+  padding: 5px 10px;
+  border-radius: 20px;
+  font-size: 13px;
+  font-weight: 600;
+  color: rgb(81, 65, 21);
+}
+
+.status-badge.PENDING {
+  background-color: #f59e0b;
+}
+.status-badge.IN_PROGRESS {
+  background-color: #3b82f6;
+}
+.status-badge.COMPLETED {
+  background-color: #10b981;
+}
+.status-badge.CANCELLED {
+  background-color: #ef4444;
+}
+
+@media (max-width: 768px) {
+  .manager-panel-container {
+    padding: 15px;
+  }
+
+  .manager-panel-container table,
+  .manager-panel-container thead,
+  .manager-panel-container tbody,
+  .manager-panel-container th,
+  .manager-panel-container td,
+  .manager-panel-container tr {
+    display: block;
+  }
+
+  .manager-panel-container tr {
+    margin-bottom: 20px;
+  }
+
+  .manager-panel-container td {
+    padding: 8px 12px;
+    border: none;
+    position: relative;
+  }
+
+  .manager-panel-container td::before {
+    content: attr(data-label);
+    position: absolute;
+    left: 12px;
+    font-weight: bold;
+    text-transform: uppercase;
+    font-size: 12px;
+    color: #6b7280;
+  }
+}

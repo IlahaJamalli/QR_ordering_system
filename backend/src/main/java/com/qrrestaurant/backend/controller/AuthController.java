@@ -1,4 +1,4 @@
-package com.qrrestaurant.backend.Controller;
+package com.qrrestaurant.backend.controller;
 
 import com.qrrestaurant.backend.model.Staff;
 import com.qrrestaurant.backend.repository.StaffRepository;

@@ -36,20 +36,28 @@ public class OrderController {
     // 🟢 Place a new order
     @PostMapping
     public Order placeOrder(@Valid @RequestBody Order order) {
-        if (order.getHistory() == null || order.getHistory().isEmpty()) {
-            order.setHistory(
-                    List.of(new Order.HistoryLine(order.getStatus(), order.getOrderedTime()))
-            );
+        try {
+            System.out.println("🚀 Incoming order payload: " + order);
+
+            if (order.getHistory() == null || order.getHistory().isEmpty()) {
+                order.setHistory(
+                        List.of(new Order.HistoryLine(order.getStatus(), order.getOrderedTime()))
+                );
+            }
+
+            Order savedOrder = orderRepo.save(order);
+
+            String message = "New order placed: Table " + order.getTableNumber() + ", Order ID: " + savedOrder.getId();
+            messageProducer.sendOrderMessage(message);
+
+            return savedOrder;
+        } catch (Exception e) {
+            System.err.println("❌ Error while saving order:");
+            e.printStackTrace(); // <-- This will print the exact cause in the terminal
+            throw e;
         }
-
-        Order savedOrder = orderRepo.save(order);
-
-        // ✅ Send message to RabbitMQ
-        String message = "New order placed: Table " + order.getTableNumber() + ", Order ID: " + savedOrder.getId();
-        messageProducer.sendOrderMessage(message);
-
-        return savedOrder;
     }
+
 
     // 🟢 Get ALL orders (for manager)
     @GetMapping
@@ -66,8 +74,11 @@ public class OrderController {
     // 🟢 Get orders for waiter (only COMPLETED)
     @GetMapping("/waiter")
     public List<Order> getWaiterOrders() {
-        return orderRepo.findByStatusNotIn(List.of("COMPLETED", "Delivered"));
+        List<Order> completed = orderRepo.findByStatus("COMPLETED");
+        System.out.println("👀 Completed Orders: " + completed.size());
+        return completed;
     }
+
 
     // 🟢 Update order status (Kitchen, Waiter)
     @PutMapping("/{id}/status")

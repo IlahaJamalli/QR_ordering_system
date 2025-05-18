@@ -1,42 +1,51 @@
+/* === ROOT LAYOUT ====================================================== */
 #root {
-  max-width: 1280px;
-  margin: 0 auto;
-  padding: 2rem;
-  text-align: center;
+  min-height: 100vh;         /* fill full viewport */
+  width: 100%;
+  margin: 0 auto;            /* centre on very wide screens */
+  padding-inline: 1rem;      /*horizontal breathing room*/
+  padding-block: 1.5rem;     /* top / bottom */
+  box-sizing: border-box;
+  display: flex;
+  flex-direction: column;    /* allows children to stack naturally */
 }
 
+/* Let content grow full-width on phones, gently cap on very large screens */
+@media (min-width: 1360px) {
+  #root {
+    max-width: 1280px;       /* same cap you had before, but only ≥ 1360 px */
+  }
+}
+
+/* === Vite demo logo (optional) ======================================= */
 .logo {
   height: 6em;
   padding: 1.5em;
-  will-change: filter;
   transition: filter 300ms;
 }
-.logo:hover {
-  filter: drop-shadow(0 0 2em #646cffaa);
-}
-.logo.react:hover {
-  filter: drop-shadow(0 0 2em #61dafbaa);
-}
-
-@keyframes logo-spin {
-  from {
-    transform: rotate(0deg);
-  }
-  to {
-    transform: rotate(360deg);
-  }
-}
+.logo:hover        { filter: drop-shadow(0 0 2em #646cffaa); }
+.logo.react:hover  { filter: drop-shadow(0 0 2em #61dafbaa); }
 
 @media (prefers-reduced-motion: no-preference) {
   a:nth-of-type(2) .logo {
     animation: logo-spin infinite 20s linear;
   }
 }
-
-.card {
-  padding: 2em;
+@keyframes logo-spin {
+  from { transform: rotate(0deg); }
+  to   { transform: rotate(360deg); }
 }
 
-.read-the-docs {
-  color: #888;
+/* === Utility demo card / docs link (optional) ======================== */
+.card          { padding: 2em; }
+.read-the-docs { color: #888; }
+
+/* === SMALL-SCREEN TWEAKS (=< 480 px) ================================= */
+@media (max-width: 480px) {
+  #root {
+    padding-inline: 0.6rem;
+    padding-block: 1rem;
+  }
+  .logo { height: 4.5em; padding: 1em; }
+  .card { padding: 1.4em; }
 }
