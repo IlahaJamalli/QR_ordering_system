@@ -42,7 +42,7 @@ public class TableController {
                     .generateQRCodeImage(url, "table_" + table.getTableNumber());
 
             // Save the path in the database
-            table.setQrCodeUrl(qrCodePath);
+            table.setQrCode(qrCodePath);
 
         } catch (Exception e) {
             // ✅ Better to throw the exception so GlobalExceptionHandler catches it

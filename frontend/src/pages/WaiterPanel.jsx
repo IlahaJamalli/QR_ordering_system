@@ -1,4 +1,5 @@
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
+import "./WaiterPanel.css";
 
 function WaiterPanel() {
     const [orders, setOrders] = useState([]);
@@ -6,14 +7,13 @@ function WaiterPanel() {
     const role = localStorage.getItem("staffRole");
     const email = localStorage.getItem("staffEmail");
 
-    // --- Fetch orders ---
     const fetchOrders = () => {
         fetch("http://localhost:8080/api/orders/waiter")
-            .then(res => {
+            .then((res) => {
                 if (!res.ok) throw new Error("Failed to load orders.");
                 return res.json();
             })
-            .then(data => setOrders(data))
+            .then((data) => setOrders(data))
             .catch(() => setError("Error fetching orders."));
     };
 
@@ -25,58 +25,55 @@ function WaiterPanel() {
         fetchOrders();
     }, [role]);
 
-    // --- Mark Delivered ---
     const markDelivered = (orderId) => {
         fetch(`http://localhost:8080/api/orders/${orderId}/status`, {
             method: "PUT",
             headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({ status: "Delivered" })
+            body: JSON.stringify({ status: "Delivered" }),
         })
-            .then(res => {
+            .then((res) => {
                 if (!res.ok) throw new Error("Failed to update status.");
-                // ✅ After marking delivered, reload the list!
                 fetchOrders();
             })
             .catch(() => alert("Failed to update status."));
     };
 
-    if (error) return <p style={{ color: "red" }}>{error}</p>;
-
     return (
-        <div style={{ padding: "20px" }}>
-            <h2>Waiter Panel</h2>
-            <p>Logged in as: {email} ({role})</p>
+        <div className="waiter-wrapper">
+            <div className="waiter-panel">
+                <h2>Waiter Panel</h2>
+                <p>
+                    Logged in as: <strong>{email}</strong> ({role})
+                </p>
 
-            {orders.length === 0 ? (
-                <p>No completed orders to deliver.</p>
-            ) : (
-                <table border="1" cellPadding="10" style={{ width: "100%", marginTop: "20px" }}>
-                    <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Table</th>
-                        <th>Items</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {orders.map(order => (
-                        <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{order.tableNumber}</td>
-                            <td>{order.orderedItems.map(item => item.name).join(", ")}</td>
-                            <td>{order.status}</td>
-                            <td>
-                                <button onClick={() => markDelivered(order.id)}>
-                                    Mark as Delivered
-                                </button>
-                            </td>
-                        </tr>
-                    ))}
-                    </tbody>
-                </table>
-            )}
+                {error && <p className="error">{error}</p>}
+
+                {orders.length === 0 ? (
+                    <p className="dim">No completed orders to deliver.</p>
+                ) : (
+                    orders.map((order) => (
+                        <div key={order.id} className="order-card">
+                            <div className="order-info">
+                                <strong>Order ID:</strong> {order.id}
+                                <br />
+                                <strong>Table:</strong> {order.tableNumber}
+                            </div>
+                            <div className="item-list">
+                                {order.orderedItems
+                                    .map((item) => `${item.name} × ${item.quantity || 1}`)
+                                    .join(", ")}
+                            </div>
+                            <div className="status">Status: {order.status}</div>
+                            <button
+                                className="deliver-btn"
+                                onClick={() => markDelivered(order.id)}
+                            >
+                                Mark as Delivered
+                            </button>
+                        </div>
+                    ))
+                )}
+            </div>
         </div>
     );
 }
