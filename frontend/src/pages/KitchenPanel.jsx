@@ -1,28 +1,34 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
+import "./KitchenPanel.css";
 
 function KitchenPanel() {
     const [orders, setOrders] = useState([]);
     const [statusUpdates, setStatusUpdates] = useState({});
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState("");
 
-    // Fetch kitchen orders (NOT completed)
     const fetchOrders = () => {
+        setLoading(true);
+        setError("");
+
         axios
             .get("http://localhost:8080/api/orders/kitchen")
-            .then((response) => {
-                setOrders(response.data);
+            .then((res) => {
+                const withChat = res.data.map((o) => ({ ...o, replyText: "" }));
+                setOrders(withChat);
             })
-            .catch((error) => {
-                console.error("Error fetching orders:", error);
-            });
+            .catch((err) => {
+                console.error("Error fetching orders:", err);
+                setError("Failed to load orders. Please try again.");
+            })
+            .finally(() => setLoading(false));
     };
 
-    // On first load
     useEffect(() => {
         fetchOrders();
     }, []);
 
-    // Handle status change in dropdown
     const handleStatusChange = (orderId, newStatus) => {
         setStatusUpdates((prev) => ({
             ...prev,
@@ -30,70 +36,141 @@ function KitchenPanel() {
         }));
     };
 
-    // Save status change to backend
     const saveStatus = (orderId) => {
         const newStatus = statusUpdates[orderId];
+        if (!newStatus) return;
+
+        setLoading(true);
         axios
             .put(`http://localhost:8080/api/orders/${orderId}/status`, {
                 status: newStatus,
             })
             .then(() => {
-                alert(`Order ${orderId} updated to ${newStatus}`);
-                fetchOrders(); // Refresh list
+                fetchOrders();
             })
-            .catch((error) => {
-                console.error("Error updating status:", error);
+            .catch((err) => {
+                console.error("Error updating status:", err);
+                setError("Failed to update status.");
+            })
+            .finally(() => setLoading(false));
+    };
+
+    const sendReply = async (orderId, message) => {
+        if (!message.trim()) return;
+
+        try {
+            setLoading(true);
+            await axios.put(`http://localhost:8080/api/orders/${orderId}/comment`, {
+                sender: "kitchen",
+                comment: message.trim(),
             });
+
+            setOrders((prev) =>
+                prev.map((o) =>
+                    o.id === orderId ? { ...o, replyText: "" } : o
+                )
+            );
+            fetchOrders();
+        } catch (err) {
+            console.error("Failed to send reply", err);
+            setError("Failed to send chat message.");
+        } finally {
+            setLoading(false);
+        }
     };
 
     return (
-        <div style={{ padding: "20px" }}>
-            <h2>Kitchen Panel</h2>
-            {orders.length === 0 ? (
-                <p>No active orders</p>
-            ) : (
-                <table border="1" cellPadding="10">
-                    <thead>
-                    <tr>
-                        <th>Order ID</th>
-                        <th>Table</th>
-                        <th>Items</th>
-                        <th>Status</th>
-                        <th>Action</th>
-                    </tr>
-                    </thead>
-                    <tbody>
-                    {orders.map((order) => (
-                        <tr key={order.id}>
-                            <td>{order.id}</td>
-                            <td>{order.tableNumber}</td>
-                            <td>
-                                {order.items && order.items.map((item) => (
-                                    <div key={item.name}>
-                                        {item.name} x {item.quantity}
+        <div className="kitchen-wrapper">
+            <div className="kitchen-panel">
+                <h2>Kitchen Panel</h2>
+
+                {loading && <div className="loader">Loading orders...</div>}
+                {error && <div className="error-message">⚠️ {error}</div>}
+
+                {!loading && !error && orders.length === 0 && (
+                    <p className="dimmed">No active orders</p>
+                )}
+
+                {!loading && !error &&
+                    orders.map((order) => (
+                        <div key={order.id} className="order-card">
+                            <div className="order-meta">
+                                <strong>Order ID:</strong> <span>{order.id}</span> <br />
+                                <strong>Table:</strong> {order.tableNumber}
+                            </div>
+
+                            <div className="order-items">
+                                {(order.orderedItems || []).map((item, i) => (
+                                    <div key={i} style={{ marginBottom: "8px" }}>
+                                        <div>
+                                            🍽️ <strong>{item.name}</strong> × {item.quantity}
+                                        </div>
+                                        {item.customizations && item.customizations.length > 0 && (
+                                            <div className="customization-display">
+                                                <span className="customization-label">➤ Customizations:</span>
+                                                <ul className="customization-list">
+                                                    {item.customizations.map((c, idx) => (
+                                                        <li key={idx}>🛠️ {c}</li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+
                                     </div>
                                 ))}
-                            </td>
-                            <td>
+                            </div>
+
+                            <div className="order-controls">
+                                <label>Status:</label>
                                 <select
                                     value={statusUpdates[order.id] || order.status}
-                                    onChange={(e) => handleStatusChange(order.id, e.target.value)}
+                                    onChange={(e) =>
+                                        handleStatusChange(order.id, e.target.value)
+                                    }
                                 >
                                     <option value="NEW">NEW</option>
                                     <option value="IN_PROGRESS">IN_PROGRESS</option>
                                     <option value="COMPLETED">COMPLETED</option>
                                 </select>
-                            </td>
-                            <td>
                                 <button onClick={() => saveStatus(order.id)}>
-                                    Save Status
+                                    💾 Save Status
                                 </button>
-                            </td>
-                        </tr>
+                            </div>
+
+                            <div className="chat-box">
+                                <strong>Chat:</strong>
+                                <div className="chat-history">
+                                    {(order.commentsHistory || []).map((c, i) => (
+                                        <div key={i} className={`chat-bubble ${c.sender}`}>
+                                            <b>{c.sender}:</b> {c.message}
+                                        </div>
+                                    ))}
+                                </div>
+                                <textarea
+                                    rows="1"
+                                    placeholder="Type your reply to customer..."
+                                    value={order.replyText}
+                                    onChange={(e) =>
+                                        setOrders((prev) =>
+                                            prev.map((o) =>
+                                                o.id === order.id
+                                                    ? { ...o, replyText: e.target.value }
+                                                    : o
+                                            )
+                                        )
+                                    }
+                                />
+                                <button
+                                    className="send-btn"
+                                    onClick={() => sendReply(order.id, order.replyText)}
+                                    disabled={!order.replyText?.trim()}
+                                >
+                                    📤 Send Reply
+                                </button>
+                            </div>
+                        </div>
                     ))}
-                    </tbody>
-                </table>
-            )}
+            </div>
         </div>
     );
 }
