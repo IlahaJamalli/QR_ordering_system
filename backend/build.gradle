@@ -27,7 +27,10 @@ dependencies {
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
 	testImplementation 'org.mockito:mockito-core'
 	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+<<<<<<< HEAD
 	testImplementation 'com.h2database:h2'
+=======
+>>>>>>> 92a037b743096c5b453748a5e0567827248ab760
 	implementation 'com.google.zxing:core:3.5.2'
 	implementation 'com.google.zxing:javase:3.5.2'
 	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
