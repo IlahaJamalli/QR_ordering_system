@@ -5,7 +5,9 @@ import Login from "./pages/Login";
 import KitchenPanel from "./pages/KitchenPanel";
 import WaiterPanel from "./pages/WaiterPanel";
 import KitchenMessages from "./pages/KitchenMessages";
-import ManagerPanel from "./pages/ManagerPanel"; // ✅ NEW import
+import ManagerPanel from "./pages/ManagerPanel";
+import MenuEditor from "./pages/MenuEditor"; // adjust path if needed
+
 
 function App() {
   const path = window.location.pathname;
@@ -17,6 +19,9 @@ function App() {
   if (path.startsWith("/waiter-panel")) return <WaiterPanel />;
   if (path.startsWith("/kitchen-messages")) return <KitchenMessages />;
   if (path.startsWith("/manager-panel")) return <ManagerPanel />;
+  if (path.startsWith("/table")) return <LandingPage />
+  if (path.startsWith("/manager-menu")) return <MenuEditor />;
+
   return <p style={{ textAlign: "center" }}>Unknown path</p>;
 }
 

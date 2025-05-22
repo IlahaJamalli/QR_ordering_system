@@ -1,0 +1,116 @@
+html, body {
+    height: auto;
+    overflow: auto;
+}
+
+.menu-editor-container {
+    max-width: 800px;
+    margin: 0 auto;
+    padding: 30px 20px;
+    min-height: 100vh;
+    background-color: #e0e6f7;
+    box-sizing: border-box;
+}
+
+.menu-form {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    background: #fff;
+    padding: 20px;
+    border-radius: 12px;
+    margin-bottom: 30px;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.menu-form input {
+    padding: 10px;
+    font-size: 16px;
+    border: 1px solid #ccc;
+    border-radius: 6px;
+}
+
+.submit-btn {
+    background-color: #27ae60;
+    color: white;
+    padding: 10px;
+    border: none;
+    border-radius: 6px;
+    font-weight: bold;
+    cursor: pointer;
+}
+
+.menu-section {
+    margin-top: 20px;
+}
+
+.menu-title {
+    font-size: 22px;
+    font-weight: bold;
+    color: #2c3e50;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.menu-list {
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+}
+
+.menu-card {
+    background-color: #ffffff;
+    border: 1px solid #ddd;
+    border-radius: 10px;
+    padding: 16px;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.05);
+}
+
+.menu-header {
+    display: flex;
+    justify-content: space-between;
+    font-weight: bold;
+    font-size: 18px;
+    color: #2c3e50;
+}
+
+.menu-meta {
+    font-size: 14px;
+    color: #888;
+    margin-bottom: 6px;
+}
+
+.menu-description {
+    font-style: italic;
+    color: #444;
+    margin-bottom: 6px;
+}
+
+.menu-options {
+    font-size: 14px;
+    color: #555;
+    margin-bottom: 10px;
+}
+
+.menu-buttons {
+    display: flex;
+    gap: 10px;
+}
+
+.edit-btn {
+    padding: 6px 12px;
+    background-color: #3498db;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}
+
+.delete-btn {
+    padding: 6px 12px;
+    background-color: #e74c3c;
+    color: white;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+}

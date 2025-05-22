@@ -1,33 +1,48 @@
 package com.qrrestaurant.backend.controller;
 
 import com.qrrestaurant.backend.model.MenuItem;
-import com.qrrestaurant.backend.repository.MenuItemRepository;
-import org.springframework.beans.factory.annotation.Autowired;
+import com.qrrestaurant.backend.service.MenuItemService;
+import lombok.RequiredArgsConstructor;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/menu")
+@RequiredArgsConstructor
 public class MenuItemController {
 
-    @Autowired
-    private MenuItemRepository menuItemRepository;
+    private final MenuItemService menuItemService;
 
-    @GetMapping
-    public List<MenuItem> getAllMenuItems() {
-        return menuItemRepository.findAll();
-    }
-
+    // Create a new menu item
     @PostMapping
-    public MenuItem createMenuItem(@RequestBody MenuItem item) {
-        return menuItemRepository.save(item);
+    public ResponseEntity<MenuItem> createItem(@RequestBody MenuItem item) {
+        return ResponseEntity.ok(menuItemService.createMenuItem(item));
     }
 
+    // Update an existing menu item
+    @PutMapping("/{id}")
+    public ResponseEntity<MenuItem> updateItem(@PathVariable Long id, @RequestBody MenuItem item) {
+        return ResponseEntity.ok(menuItemService.updateMenuItem(id, item));
+    }
+
+    // Delete a menu item
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteItem(@PathVariable Long id) {
+        menuItemService.deleteMenuItem(id);
+        return ResponseEntity.noContent().build();
+    }
+
+    // Get all menu items
+    @GetMapping
+    public ResponseEntity<List<MenuItem>> getAllItems() {
+        return ResponseEntity.ok(menuItemService.getAllMenuItems());
+    }
+
+    // Get menu item by ID
     @GetMapping("/{id}")
-    public MenuItem getMenuItemById(@PathVariable Long id) {
-        return menuItemRepository.findById(id)
-                .orElseThrow(() -> new RuntimeException("Menu item not found"));
+    public ResponseEntity<MenuItem> getItemById(@PathVariable Long id) {
+        return ResponseEntity.ok(menuItemService.getMenuItemById(id));
     }
-
 }

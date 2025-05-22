@@ -2,6 +2,7 @@ package com.qrrestaurant.backend.controller;
 
 import com.qrrestaurant.backend.model.TableEntity;
 import com.qrrestaurant.backend.repository.TableRepository;
+import com.qrrestaurant.backend.util.QrCodeGenerator;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.*;
 
@@ -13,6 +14,9 @@ public class TableController {
 
     @Autowired
     private TableRepository tableRepository;
+
+    @Autowired
+    private QrCodeGenerator qrCodeGenerator;
 
     // ✅ Get all tables — no exception handling needed
     @GetMapping
@@ -38,11 +42,10 @@ public class TableController {
             //ipconfig smth with 192.168.x.x
 //            String url = "http://192.168.0.105:5173/order?tableId=" + table.getTableNumber();
             // Generate QR Code image
-            String qrCodePath = com.qrrestaurant.backend.util.QrCodeGenerator
-                    .generateQRCodeImage(url, "table_" + table.getTableNumber());
+            String qrCodePath = qrCodeGenerator.generateQRCodeImage(url, "table_" + table.getTableNumber());
 
             // Save the path in the database
-            table.setQrCodeUrl(qrCodePath);
+            table.setQrCode(qrCodePath);
 
         } catch (Exception e) {
             // ✅ Better to throw the exception so GlobalExceptionHandler catches it

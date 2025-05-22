@@ -5,7 +5,7 @@ import lombok.Data;
 
 @Entity
 @Data
-@Table(name = "restaurant_table")  // PostgreSQL doesn't like 'Table' as table name
+@Table(name = "restaurant_table")  // Avoid using reserved keyword "Table"
 public class TableEntity {
 
     @Id
@@ -15,5 +15,36 @@ public class TableEntity {
     @Column(unique = true)
     private String tableNumber;
 
-    private String qrCodeUrl;
+    private int capacity;
+
+    private String qrCode;
+
+    // Explicit setters and getters (optional if using @Data, but included for clarity)
+    public void setCapacity(int capacity) {
+        this.capacity = capacity;
+    }
+
+    public void setQrCode(String qrCode) {
+        this.qrCode = qrCode;
+    }
+
+    public void setTableNumber(String tableNumber) {
+        this.tableNumber = tableNumber;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public String getTableNumber() {
+        return tableNumber;
+    }
+
+    public String getQrCode() {
+        return qrCode;
+    }
+
+    public int getCapacity() {
+        return capacity;
+    }
 }
