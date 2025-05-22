@@ -36,6 +36,16 @@ function ManagerPanel() {
         <div className="manager-panel-container">
             <h2>Manager Panel</h2>
             <p>Logged in as: {email} ({role})</p>
+            <div className="edit-menu-wrapper">
+                <button
+                    onClick={() => window.location.href = "/manager-menu"}
+                    className="edit-menu-btn"
+                >
+                    Edit Menu
+                </button>
+            </div>
+
+
 
             {loading && <p className="loading-msg">Loading orders...</p>}
             {error && <p className="error-msg">{error}</p>}

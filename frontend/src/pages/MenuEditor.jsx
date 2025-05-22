@@ -8,6 +8,7 @@ export default function MenuEditor() {
         name: "", description: "", price: "", category: "", customizationOptions: ""
     });
     const [editId, setEditId] = useState(null);
+    const [searchTerm, setSearchTerm] = useState(""); // 🔍 Filter state
 
     useEffect(() => {
         loadMenu();
@@ -71,6 +72,12 @@ export default function MenuEditor() {
         }
     };
 
+    // 🔍 Filter logic
+    const filteredItems = menuItems.filter(item =>
+        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.category.toLowerCase().includes(searchTerm.toLowerCase())
+    );
+
     return (
         <div className="menu-editor-container">
             <h2>{editId ? "Edit" : "Add"} Menu Item</h2>
@@ -86,8 +93,16 @@ export default function MenuEditor() {
 
             <div className="menu-section">
                 <h3 className="menu-title">Current Menu</h3>
+                <input
+                    type="text"
+                    placeholder="Search by name or category..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    className="search-box"
+                />
+
                 <div className="menu-list">
-                    {menuItems.map(item => (
+                    {filteredItems.map(item => (
                         <div key={item.id} className="menu-card">
                             <div className="menu-header">
                                 <span className="menu-name">{item.name}</span>
